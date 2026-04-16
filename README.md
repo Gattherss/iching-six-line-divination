@@ -74,6 +74,7 @@ The original implementation ran in Stata, depending on `runiform()` and `.dta` f
 - **Local**：Double-click `wenshi-liuyao.html` to open in any browser
 
 声明：仅供自我探索、学习使用。纳甲UI还是过于粗糙了，六亲关系刑冲克害也不够直观。不过本软件主要是用来起卦。对于解卦，可以点击“复制卦象文字”然后发送给秘塔AI（研究模式）或deepseek。如通晓解卦义理之高手，可以用“掌心六幺”这个软件来复盘。我自己在用，看卦象六亲非常方便也非常好用。
+
 ---
 
 ## 功能特性 / Features
