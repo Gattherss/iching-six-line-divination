@@ -12,3 +12,5 @@ Thumbs.db
 
 # Tauri (optional, not used for web deployment)
 wenshi-liuyao-tauri/
+
+.vercel
