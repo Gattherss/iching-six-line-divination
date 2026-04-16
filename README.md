@@ -8,7 +8,7 @@
 
 ## 缘起 / Origin
 
-本项目的灵感来源于兰州大学同学在 Gitee 上发布的 Stata 命令 `chgdiv6`（仓库：`chenshaoxuemei/chgdiv6_bkp`）。原作者使用 Stata 的 `runiform()` 随机数函数实现了一套基于钱筮法的六爻占卜工具，包含卦辞变占、数字/文字起卦等基础功能。
+本项目的灵感来源于chenshaoxuemei在 Gitee 上发布的 Stata 命令 `chgdiv6`（仓库：`chenshaoxuemei/chgdiv6_bkp`）。原作者使用 Stata 的 `runiform()` 随机数函数实现了一套基于钱筮法的六爻占卜工具，包含卦辞变占、数字/文字起卦等基础功能。
 
 This project was inspired by a Stata command `chgdiv6` published on Gitee (repository: `chenshaoxuemei/chgdiv6_bkp`) by a classmate at Lanzhou University. The original implementation used Stata's `runiform()` random number function to build a coin-method hexagram casting tool with basic features like changing-line interpretation and numeric/text-based seed generation.
 
