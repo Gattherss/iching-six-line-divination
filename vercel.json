@@ -4,5 +4,8 @@
   "buildCommand": null,
   "outputDirectory": ".",
   "devCommand": null,
-  "installCommand": null
+  "installCommand": null,
+  "rewrites": [
+    { "source": "/", "destination": "/wenshi-liuyao.html" }
+  ]
 }
