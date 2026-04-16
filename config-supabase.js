@@ -1,0 +1,4 @@
+// Supabase 配置
+// 项目: ppnsatnjmfregnjjkzqf
+window.WENSHI_SUPABASE_URL = 'https://ppnsatnjmfregnjjkzqf.supabase.co';
+window.WENSHI_SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBwbnNhdG5qbWZyZWduamprenFmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYzMDYxMzQsImV4cCI6MjA5MTg4MjEzNH0.2bTLGmnn-97OwBE2Yg3YCuuSJqxlf6CEww28Bt_7m40';

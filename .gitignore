@@ -1,0 +1,14 @@
+# Vercel
+.vercel
+node_modules
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+
+# Tauri (optional, not used for web deployment)
+wenshi-liuyao-tauri/
