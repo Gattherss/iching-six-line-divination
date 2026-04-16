@@ -2339,15 +2339,23 @@ function getShichenIndex(hour) {
 
 function getShichenInfo(now) {
   if (!now) now = new Date();
-  const idx = getShichenIndex(now.getHours());
+  const hour = now.getHours();
+  const idx = getShichenIndex(hour);
+  const seedDate = new Date(now.getTime());
+  if (idx === 0 && hour === 0) {
+    seedDate.setDate(seedDate.getDate() - 1);
+  }
   const y = now.getFullYear();
   const m = (now.getMonth() + 1).toString().padStart(2, '0');
   const d = now.getDate().toString().padStart(2, '0');
+  const seedY = seedDate.getFullYear();
+  const seedM = (seedDate.getMonth() + 1).toString().padStart(2, '0');
+  const seedD = seedDate.getDate().toString().padStart(2, '0');
   return {
     name: DIZHI[idx] + '时',
     range: SHICHEN_RANGES[idx],
     dateStr: `${y}年${m}月${d}日`,
-    key: `${y}-${m}-${d}-${idx}`
+    key: `${seedY}-${seedM}-${seedD}-${idx}`
   };
 }
 
@@ -2389,57 +2397,47 @@ function getHexCode(lines, col) {
 function interpret(lines, chgsum, divCode, chgCode) {
   const results = [];
   const names = [];
+  const changingRows = [];
+  const staticRows = [];
+
+  for (let row = 0; row < 6; row++) {
+    if (lines[row].isChanging) changingRows.push(row);
+    else staticRows.push(row);
+  }
 
   if (chgsum === 0) {
     const e = ICHING['div' + divCode + '_0'];
     if (e) { results.push(e.words); names.push(e.name); }
   }
   else if (chgsum === 1) {
-    for (let row = 0; row < 6; row++) {
-      if (lines[row].isChanging) {
-        const rowNum = row + 1;
-        const e = ICHING['div' + divCode + '_' + rowNum];
-        if (e) { results.push(e.words); names.push(e.name); }
-      }
-    }
+    const rowNum = changingRows[0] + 1;
+    const e = ICHING['div' + divCode + '_' + rowNum];
+    if (e) { results.push(e.words); names.push(e.name); }
   }
   else if (chgsum === 2) {
-    for (let row = 0; row < 6; row++) {
-      if (lines[row].isChanging) {
-        const rowNum = row + 1;
-        const e = ICHING['div' + divCode + '_' + rowNum];
-        if (e) { results.push(e.words); names.push(e.name); }
-      }
+    for (let i = 0; i < changingRows.length; i++) {
+      const rowNum = changingRows[i] + 1;
+      const e = ICHING['div' + divCode + '_' + rowNum];
+      if (e) { results.push(e.words); names.push(e.name + (i === 0 ? ' (涓轰富)' : '')); }
     }
   }
   else if (chgsum === 3) {
     const e1 = ICHING['div' + divCode + '_0'];
     const e2 = ICHING['div' + chgCode + '_0'];
-    if (lines[0].isChanging) {
-      if (e2) { results.push(e2.words); names.push(e2.name); }
-      if (e1) { results.push(e1.words); names.push(e1.name); }
-    } else {
-      if (e1) { results.push(e1.words); names.push(e1.name); }
-      if (e2) { results.push(e2.words); names.push(e2.name); }
-    }
+    if (e1) { results.push(e1.words); names.push(e1.name + ' (涓轰富)'); }
+    if (e2) { results.push(e2.words); names.push(e2.name); }
   }
   else if (chgsum === 4) {
-    for (let row = 5; row >= 0; row--) {
-      if (!lines[row].isChanging) {
-        const rowNum = row + 1;
-        const e = ICHING['div' + chgCode + '_' + rowNum];
-        if (e) { results.push(e.words); names.push(e.name); }
-      }
+    for (let i = staticRows.length - 1; i >= 0; i--) {
+      const rowNum = staticRows[i] + 1;
+      const e = ICHING['div' + chgCode + '_' + rowNum];
+      if (e) { results.push(e.words); names.push(e.name + (i === staticRows.length - 1 ? ' (涓轰富)' : '')); }
     }
   }
   else if (chgsum === 5) {
-    for (let row = 0; row < 6; row++) {
-      if (!lines[row].isChanging) {
-        const rowNum = row + 1;
-        const e = ICHING['div' + chgCode + '_' + rowNum];
-        if (e) { results.push(e.words); names.push(e.name); }
-      }
-    }
+    const rowNum = staticRows[0] + 1;
+    const e = ICHING['div' + chgCode + '_' + rowNum];
+    if (e) { results.push(e.words); names.push(e.name); }
   }
   else if (chgsum === 6) {
     if (divCode === '111111') {
