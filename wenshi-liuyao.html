@@ -1963,8 +1963,6 @@ body.modal-open {
   var SUPABASE_URL = window.WENSHI_SUPABASE_URL || '';
   var SUPABASE_ANON_KEY = window.WENSHI_SUPABASE_ANON_KEY || '';
 
-  var SYNC_QUEUE_KEY = 'wenshi-liuyao_sync_queue_v1';
-  var SYNC_LAST_FETCH_KEY = 'wenshi-liuyao_last_sync_v1';
   var AUTH_STATE_KEY = 'wenshi-liuyao_auth_state_v1';
 
   var supabaseClient = null;
@@ -1992,10 +1990,13 @@ body.modal-open {
   window.addEventListener('offline', function() { isOnline = false; });
 
   function initSupabaseClient() {
-    if (!SUPABASE_URL || !SUPABASE_ANON_KEY || !window.supabase) return;
+    if (!SUPABASE_URL || !SUPABASE_ANON_KEY || !window.supabase || supabaseClient) return;
     try {
       supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
         auth: { persistSession: true, autoRefreshToken: true }
+      });
+      supabaseClient.auth.onAuthStateChange(function(event, session) {
+        handleAuthStateChange(event, session);
       });
     } catch (e) {
       console.warn('Supabase init failed:', e);
@@ -2018,11 +2019,20 @@ body.modal-open {
 
   async function signOutUser() {
     if (!supabaseClient) return;
+    var previousUserId = supabaseUser && supabaseUser.id ? supabaseUser.id : null;
     try { await supabaseClient.auth.signOut(); } catch (e) {}
     supabaseUser = null;
+    syncQueue = [];
+    clearTimeout(syncFlushTimer);
+    syncFlushTimer = null;
     localStorage.removeItem(AUTH_STATE_KEY);
-    localStorage.removeItem(STORAGE_KEY);
-    persistSyncQueue([]);
+    if (previousUserId) {
+      clearScopedHistory(previousUserId);
+      clearScopedSyncQueue(previousUserId);
+      clearScopedLastSync(previousUserId);
+    }
+    loadSyncQueue();
+    if (typeof renderHistory === 'function') renderHistory();
   }
 
   async function checkAuthSession() {
@@ -2030,27 +2040,60 @@ body.modal-open {
     try {
       var sessionData = await supabaseClient.auth.getSession();
       var session = sessionData.data.session;
-      if (session) {
-        supabaseUser = session.user;
-        localStorage.setItem(AUTH_STATE_KEY, JSON.stringify({
-          id: session.user.id,
-          email: session.user.email || ''
-        }));
-      }
+      setActiveSupabaseUser(session ? session.user : null);
     } catch (e) {
       console.warn('Session check failed:', e);
     }
   }
 
+  function setActiveSupabaseUser(user) {
+    supabaseUser = user || null;
+    if (supabaseUser) {
+      localStorage.setItem(AUTH_STATE_KEY, JSON.stringify({
+        id: supabaseUser.id,
+        email: supabaseUser.email || ''
+      }));
+    } else {
+      localStorage.removeItem(AUTH_STATE_KEY);
+    }
+    loadSyncQueue();
+  }
+
+  async function handleAuthStateChange(event, session) {
+    var previousUserId = supabaseUser && supabaseUser.id ? supabaseUser.id : null;
+    var nextUser = session && session.user ? session.user : null;
+    var nextUserId = nextUser && nextUser.id ? nextUser.id : null;
+    if (previousUserId && nextUserId && previousUserId !== nextUserId) {
+      syncQueue = [];
+      clearTimeout(syncFlushTimer);
+      syncFlushTimer = null;
+    }
+    setActiveSupabaseUser(nextUser);
+    if (!supabaseUser) {
+      if (typeof renderHistory === 'function') renderHistory();
+      if (typeof updateAuthUI === 'function') updateAuthUI();
+      return;
+    }
+    await syncActiveUserHistory();
+    if (typeof updateAuthUI === 'function') updateAuthUI();
+  }
+
   function loadSyncQueue() {
     try {
-      var raw = localStorage.getItem(SYNC_QUEUE_KEY);
-      syncQueue = raw ? JSON.parse(raw) : [];
+      var raw = localStorage.getItem(getScopedSyncQueueKey());
+      var parsed = raw ? JSON.parse(raw) : [];
+      syncQueue = Array.isArray(parsed) ? parsed : [];
     } catch { syncQueue = []; }
   }
 
   function persistSyncQueue(queue) {
-    localStorage.setItem(SYNC_QUEUE_KEY, JSON.stringify(queue || syncQueue));
+    syncQueue = Array.isArray(queue) ? queue : syncQueue;
+    var storageKey = getScopedSyncQueueKey();
+    if (!syncQueue.length) {
+      localStorage.removeItem(storageKey);
+      return;
+    }
+    localStorage.setItem(storageKey, JSON.stringify(syncQueue));
   }
 
   async function flushSyncQueue() {
@@ -2128,6 +2171,14 @@ body.modal-open {
   async function initializeCloudSync() {
     if (!supabaseClient) return;
     await checkAuthSession();
+    if (!supabaseUser) {
+      if (typeof renderHistory === 'function') renderHistory();
+      return;
+    }
+    await syncActiveUserHistory();
+  }
+
+  async function syncActiveUserHistory() {
     if (!supabaseUser) return;
     try {
       var cloudRecords = await fetchFromSupabase();
@@ -2150,8 +2201,10 @@ body.modal-open {
       merged.sort(function(a, b) { return new Date(b.timestamp) - new Date(a.timestamp); });
       persistHistory(merged);
       if (cloudRecords.length > 0) {
-        localStorage.setItem(SYNC_LAST_FETCH_KEY, cloudRecords[0].timestamp);
+        localStorage.setItem(getScopedLastSyncKey(), cloudRecords[0].timestamp);
       }
+      persistSyncQueue(syncQueue);
+      if (typeof renderHistory === 'function') renderHistory();
     } catch (e) {
       console.warn('Sync init failed, using local data:', e);
     }
@@ -2190,8 +2243,10 @@ body.modal-open {
 
   async function clearHistoryWithSync() {
     if (!confirm('确定清空所有历史记录？此操作不可撤销。')) return;
-    localStorage.removeItem(STORAGE_KEY);
-    localStorage.removeItem(LEGACY_STORAGE_KEY);
+    clearActiveScopedHistory();
+    clearScopedSyncQueue();
+    clearScopedLastSync();
+    syncQueue = [];
     if (typeof visibleHistoryCache !== 'undefined') visibleHistoryCache = [];
     if (typeof closeHistoryModal === 'function') closeHistoryModal();
     if (typeof renderHistory === 'function') renderHistory();
@@ -2204,8 +2259,9 @@ body.modal-open {
 
   function getRawHistory() {
     try {
-      var raw = localStorage.getItem(STORAGE_KEY);
-      return raw ? JSON.parse(raw) : [];
+      var raw = localStorage.getItem(getScopedHistoryKey());
+      var parsed = raw ? JSON.parse(raw) : [];
+      return Array.isArray(parsed) ? parsed : [];
     } catch { return []; }
   }
 })();
@@ -2735,6 +2791,10 @@ function renderResult(data) {
 
 const STORAGE_KEY = 'wenshi-liuyao_history';
 const LEGACY_STORAGE_KEY = 'chgdiv6_history';
+const HISTORY_STORAGE_PREFIX = 'wenshi-liuyao_history_v2';
+const SYNC_QUEUE_STORAGE_PREFIX = 'wenshi-liuyao_sync_queue_v2';
+const SYNC_LAST_FETCH_STORAGE_PREFIX = 'wenshi-liuyao_last_sync_v2';
+const ANON_HISTORY_SCOPE = 'anon';
 const SETTINGS_KEY = 'wenshi-liuyao_settings_v1';
 const DEFAULT_SETTINGS = {
   defaultExpandNajia: false,
@@ -2749,6 +2809,46 @@ let currentWorkspaceTab = 'history';
 let currentPanelText = '';
 let najiaPanelExpanded = null;
 let najiaTableExpanded = false;
+
+function getActiveHistoryScopeId(explicitUserId) {
+  if (explicitUserId) return explicitUserId;
+  if (window.WenShiAuth && window.WenShiAuth.getUser()) {
+    return window.WenShiAuth.getUser().id;
+  }
+  return ANON_HISTORY_SCOPE;
+}
+
+function getScopedHistoryKey(explicitUserId) {
+  return `${HISTORY_STORAGE_PREFIX}:${getActiveHistoryScopeId(explicitUserId)}`;
+}
+
+function getScopedSyncQueueKey(explicitUserId) {
+  return `${SYNC_QUEUE_STORAGE_PREFIX}:${getActiveHistoryScopeId(explicitUserId)}`;
+}
+
+function getScopedLastSyncKey(explicitUserId) {
+  return `${SYNC_LAST_FETCH_STORAGE_PREFIX}:${getActiveHistoryScopeId(explicitUserId)}`;
+}
+
+function clearScopedHistory(explicitUserId) {
+  localStorage.removeItem(getScopedHistoryKey(explicitUserId));
+  if (!explicitUserId) {
+    localStorage.removeItem(STORAGE_KEY);
+    localStorage.removeItem(LEGACY_STORAGE_KEY);
+  }
+}
+
+function clearActiveScopedHistory() {
+  clearScopedHistory(getActiveHistoryScopeId());
+}
+
+function clearScopedSyncQueue(explicitUserId) {
+  localStorage.removeItem(getScopedSyncQueueKey(explicitUserId));
+}
+
+function clearScopedLastSync(explicitUserId) {
+  localStorage.removeItem(getScopedLastSyncKey(explicitUserId));
+}
 
 function loadSettings() {
   try {
@@ -2767,26 +2867,34 @@ function persistSettings() {
 }
 
 function migrateLegacyHistory() {
+  if (window.WenShiAuth && window.WenShiAuth.getUser()) return;
   try {
-    const current = localStorage.getItem(STORAGE_KEY);
+    const scopedKey = getScopedHistoryKey(ANON_HISTORY_SCOPE);
+    const current = localStorage.getItem(scopedKey);
     if (current) return;
+    const formerPrimary = localStorage.getItem(STORAGE_KEY);
+    if (formerPrimary) {
+      localStorage.setItem(scopedKey, formerPrimary);
+      localStorage.removeItem(STORAGE_KEY);
+      return;
+    }
     const legacy = localStorage.getItem(LEGACY_STORAGE_KEY);
     if (!legacy) return;
-    localStorage.setItem(STORAGE_KEY, legacy);
+    localStorage.setItem(scopedKey, legacy);
     localStorage.removeItem(LEGACY_STORAGE_KEY);
   } catch {}
 }
 
 function persistHistory(history) {
   const limited = history.slice(0, currentSettings.historyLimit);
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(limited));
+  localStorage.setItem(getScopedHistoryKey(), JSON.stringify(limited));
   return limited;
 }
 
 function getHistory() {
   migrateLegacyHistory();
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
+    const raw = localStorage.getItem(getScopedHistoryKey());
     const parsed = raw ? JSON.parse(raw) : [];
     if (!Array.isArray(parsed)) return [];
     if (parsed.length > currentSettings.historyLimit) {
@@ -3452,8 +3560,7 @@ async function clearHistory() {
     return window.WenShiAuth.clearWithSync();
   }
   if (!confirm('确定清空所有历史记录？此操作不可撤销。')) return;
-  localStorage.removeItem(STORAGE_KEY);
-  localStorage.removeItem(LEGACY_STORAGE_KEY);
+  clearActiveScopedHistory();
   visibleHistoryCache = [];
   closeHistoryModal();
   renderHistory();

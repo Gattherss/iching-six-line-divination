@@ -315,9 +315,26 @@ Based on day Ganzhi (JDN formula) and monthly branch (solar term approximation):
 └── tools/                   # 辅助工具 / Auxiliary tools
 ```
 
+## Supabase 配置 / Supabase Setup
 
+### 1. 创建项目 / Create Project
 
+访问 https://supabase.com/dashboard 创建新项目，获取 **Project URL** 和 **anon public key**。
 
+### 2. 执行 SQL / Run SQL
+
+在 Supabase SQL Editor 中执行，或直接使用仓库内的 `supabase/hexagram_history.sql`。
+
+### 3. 填写配置 / Fill Config
+
+编辑 `config-supabase.js`：
+
+```javascript
+window.WENSHI_SUPABASE_URL = 'https://YOUR_PROJECT_ID.supabase.co';
+window.WENSHI_SUPABASE_ANON_KEY = 'eyJhbGciOi...';
+```
+
+---
 
 ## 许可证 / License
 
