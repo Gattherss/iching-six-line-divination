@@ -73,6 +73,7 @@ The original implementation ran in Stata, depending on `runiform()` and `.dta` f
 - **Online**：https://wenshi-liuyao.vercel.app
 - **Local**：Double-click `wenshi-liuyao.html` to open in any browser
 
+声明：仅供自我探索、学习使用。纳甲UI还是过于粗糙了，六亲关系刑冲克害也不够直观。不过本软件主要是用来起卦。对于解卦，可以点击“复制卦象文字”然后发送给秘塔AI（研究模式）或deepseek。如通晓解卦义理之高手，可以用“掌心六幺”这个软件来复盘。我自己在用，看卦象六亲非常方便也非常好用。
 ---
 
 ## 功能特性 / Features
@@ -313,62 +314,9 @@ Based on day Ganzhi (JDN formula) and monthly branch (solar term approximation):
 └── tools/                   # 辅助工具 / Auxiliary tools
 ```
 
----
 
-## Supabase 配置 / Supabase Setup
 
-### 1. 创建项目 / Create Project
 
-访问 https://supabase.com/dashboard 创建新项目，获取 **Project URL** 和 **anon public key**。
-
-### 2. 执行 SQL / Run SQL
-
-在 Supabase SQL Editor 中执行：
-
-```sql
-create extension if not exists "uuid-ossp";
-
-create table hexagram_history (
-  id uuid primary key default uuid_generate_v4(),
-  user_id uuid not null references auth.users(id) on delete cascade,
-  timestamp timestamptz not null,
-  shichen text not null,
-  date_str text not null,
-  input text,
-  ben_name text not null,
-  chg_name text not null,
-  div_code text not null,
-  chg_code text not null,
-  chgsum int not null,
-  results jsonb not null,
-  names jsonb not null,
-  lines jsonb not null,
-  source text not null default 'auto',
-  source_label text not null default '当下起卦',
-  created_at timestamptz not null default now()
-);
-
-create unique index idx_hexagram_unique on hexagram_history(user_id, timestamp);
-create index idx_hexagram_user_ts on hexagram_history(user_id, timestamp desc);
-
-alter table hexagram_history enable row level security;
-
-create policy "view_own" on hexagram_history for select using (auth.uid() = user_id);
-create policy "insert_own" on hexagram_history for insert with check (auth.uid() = user_id);
-create policy "delete_own" on hexagram_history for delete using (auth.uid() = user_id);
-create policy "update_own" on hexagram_history for update using (auth.uid() = user_id);
-```
-
-### 3. 填写配置 / Fill Config
-
-编辑 `config-supabase.js`：
-
-```javascript
-window.WENSHI_SUPABASE_URL = 'https://YOUR_PROJECT_ID.supabase.co';
-window.WENSHI_SUPABASE_ANON_KEY = 'eyJhbGciOi...';
-```
-
----
 
 ## 许可证 / License
 
