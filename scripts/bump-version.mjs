@@ -6,6 +6,7 @@ import { fileURLToPath } from 'node:url';
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const root = join(__dirname, '..');
 const pkgPath = join(root, 'package.json');
+const versionPath = join(root, 'VERSION');
 
 const bumpType = process.argv[2] || 'patch';
 const pkg = JSON.parse(readFileSync(pkgPath, 'utf8'));
@@ -27,8 +28,10 @@ switch (bumpType) {
 writeFileSync(pkgPath, JSON.stringify(pkg, null, 2) + '\n');
 
 const tagName = `v${pkg.version}`;
-execSync(`git add ${pkgPath}`, { cwd: root });
+writeFileSync(versionPath, tagName + '\n');
+
+execSync(`git add ${pkgPath} ${versionPath}`, { cwd: root });
 execSync(`git commit -m "chore: bump version to ${tagName}"`, { cwd: root });
 execSync(`git tag ${tagName}`, { cwd: root });
 
-console.log(`Bumped to ${tagName} — don't forget to push with git push && git push --tags`);
+console.log(`Bumped to ${tagName} — push with: git push && git push --tags`);
