@@ -20,7 +20,7 @@ function safeExec(cmd) {
 
 function getVersion() {
   // 1. Try latest git tag
-  const tag = safeExec('git describe --tags --exact-match');
+  const tag = safeExec('git describe --tags --abbrev=0');
   if (tag) return tag.startsWith('v') ? tag : 'v' + tag;
 
   // 2. Fallback: package.json version + optional date/hash
