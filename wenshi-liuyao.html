@@ -822,6 +822,17 @@ body.modal-open {
   color: var(--text-dim);
   font-size: 0.74rem;
 }
+.hi-note-badge {
+  margin-left: 0.35rem;
+  font-size: 0.85rem;
+}
+.hi-note-text {
+  margin-top: 0.35rem;
+  color: #b8d7fb;
+  font-size: 0.78rem;
+  line-height: 1.5;
+  font-style: italic;
+}
 .history-detail {
   display: none;
   margin-top: 0.5rem;
@@ -1134,6 +1145,28 @@ body.modal-open {
   padding: 0.95rem;
   line-height: 1.7;
   font-family: "Consolas", "Source Code Pro", monospace;
+}
+.note-textarea {
+  width: 100%;
+  min-height: 8rem;
+  resize: vertical;
+  background: rgba(8, 17, 31, 0.92);
+  border: 1px solid var(--panel-border);
+  border-radius: 14px;
+  color: var(--text);
+  padding: 0.95rem;
+  line-height: 1.7;
+  font-family: inherit;
+  font-size: 0.9rem;
+}
+.note-textarea:focus {
+  outline: none;
+  border-color: rgba(216, 186, 100, 0.52);
+  box-shadow: 0 0 0 3px rgba(216, 186, 100, 0.12);
+}
+.note-textarea::placeholder {
+  color: var(--text-dim);
+  font-style: italic;
 }
 .sync-modal-body {
   padding: 0.5rem 0;
@@ -2988,11 +3021,15 @@ function renderHexagramLineSymbol(bit) {
   return `<div class="hexagram-symbol hexagram-symbol-yin"><span class="hexagram-line-seg"></span><span class="hexagram-line-gap"></span><span class="hexagram-line-seg"></span></div>`;
 }
 
-function renderHexagramColumn(data, col, title, name, note) {
+function renderHexagramColumn(data, col, title, name, note, divCode) {
+  const notation = divCode ? trigramNotation(divCode) : '';
   let html = `<div class="hexagram-column ${col}">`;
   html += `<div class="hexagram-column-head">`;
   html += `<span class="hexagram-column-label">${escapeHtml(title)}</span>`;
   html += `<span class="hexagram-column-name">${escapeHtml(name)}</span>`;
+  if (notation) {
+    html += `<span class="hexagram-column-note">${escapeHtml(notation)}</span>`;
+  }
   if (note) {
     html += `<span class="hexagram-column-note">${escapeHtml(note)}</span>`;
   }
@@ -3018,7 +3055,7 @@ function renderMobileComparisonBoard(data, najia = buildNajiaDetails(data), extr
 
   let html = `<div class="yao-compare ${extraClass}">`;
   html += `<div class="hexagram-overview">`;
-  html += renderHexagramColumn(data, 'ben', '本卦', data.benName, palaceText);
+  html += renderHexagramColumn(data, 'ben', '本卦', data.benName, palaceText, data.divCode);
   html += `<div class="hexagram-change-rail">`;
   for (let i = 0; i < 6; i++) {
     const line = data.lines[i];
@@ -3028,7 +3065,7 @@ function renderMobileComparisonBoard(data, najia = buildNajiaDetails(data), extr
     html += `</div>`;
   }
   html += `</div>`;
-  html += renderHexagramColumn(data, 'chg', '变卦', data.chgName, changeSummary);
+  html += renderHexagramColumn(data, 'chg', '变卦', data.chgName, changeSummary, data.chgCode);
   html += `</div></div>`;
   return html;
 }
@@ -3611,6 +3648,7 @@ function applyHistoryFilters(records) {
       record.input || '',
       record.benName || '',
       record.chgName || '',
+      record.note || '',
       Array.isArray(record.results) ? record.results.join('\n') : ''
     ].join('\n').toLowerCase();
     return haystack.includes(filters.query);
@@ -3639,6 +3677,11 @@ function renderHistory() {
     const timeStr = d.getHours().toString().padStart(2,'0') + ':' +
                     d.getMinutes().toString().padStart(2,'0');
     const inputDisplay = r.input ? `「${escapeHtml(r.input.length > 20 ? r.input.slice(0,20)+'...' : r.input)}」` : '（空）';
+    const benNotation = r.divCode ? trigramNotation(r.divCode) : '';
+    const chgNotation = r.chgCode ? trigramNotation(r.chgCode) : '';
+    const benFull = benNotation ? `${r.benName}（${benNotation}）` : r.benName;
+    const chgFull = chgNotation ? `${r.chgName}（${chgNotation}）` : r.chgName;
+    const noteBadge = r.note ? `<span class="hi-note-badge">📝</span>` : '';
 
     html += `<div class="history-item" onclick="openHistoryDetail(${i})">`;
     html += `<button class="history-item-delete" onclick="event.stopPropagation(); deleteHistoryRecord(${i})" title="删除" aria-label="删除记录">&times;</button>`;
@@ -3647,7 +3690,10 @@ function renderHistory() {
     html += `<span class="history-badge">${escapeHtml(r.sourceLabel)}</span>`;
     html += `</div>`;
     html += `<div class="hi-input">${inputDisplay}</div>`;
-    html += `<div class="hi-gua">${r.benName}卦 → ${r.chgName}卦（变${r.chgsum}爻）</div>`;
+    html += `<div class="hi-gua">${escapeHtml(benFull)}卦 → ${escapeHtml(chgFull)}卦（变${r.chgsum}爻）${noteBadge}</div>`;
+    if (r.note) {
+      html += `<div class="hi-note-text">${escapeHtml(r.note.length > 50 ? r.note.slice(0, 50) + '...' : r.note)}</div>`;
+    }
     html += `<div class="hi-action">点击查看详情、复制文字或载入复盘</div>`;
     html += `</div>`;
   }
@@ -3684,13 +3730,18 @@ function formatDivinationText(data) {
     formatNajiaLineText(idx, line, najia.chgLiuQin[idx], najia.chgWangShuai[idx], najia.liushen[idx], najia.palace, najia.chgMarkers[idx])
   ).join('\n');
 
+  const benNotation = data.divCode ? trigramNotation(data.divCode) : '';
+  const chgNotation = data.chgCode ? trigramNotation(data.chgCode) : '';
+  const benFull = benNotation ? `${data.benName}（${benNotation}）` : data.benName;
+  const chgFull = chgNotation ? `${data.chgName}（${chgNotation}）` : data.chgName;
+
   return [
     `来源：${data.sourceLabel}`,
     `起卦时间：${data.shichen.dateStr} ${formatClockTime(data.now)}`,
     `时辰：${data.shichen.name}（${data.shichen.range}）`,
     `输入：${data.userInput || '（空）'}`,
-    `本卦：${data.benName}`,
-    `变卦：${data.chgName}`,
+    `本卦：${benFull}`,
+    `变卦：${chgFull}`,
     `变爻数：${data.chgsum}`,
     '',
     '六爻概览：',
@@ -3930,7 +3981,11 @@ function openHistoryDetail(index) {
 
   // --- Header ---
   html += `<div class="modal-eyebrow">${escapeHtml(data.sourceLabel)}</div>`;
-  html += `<h3 class="modal-title">${escapeHtml(data.benName)}卦 → ${escapeHtml(data.chgName)}卦</h3>`;
+  const benNotation = data.divCode ? trigramNotation(data.divCode) : '';
+  const chgNotation = data.chgCode ? trigramNotation(data.chgCode) : '';
+  const benFull = benNotation ? `${data.benName}（${benNotation}）` : data.benName;
+  const chgFull = chgNotation ? `${data.chgName}（${chgNotation}）` : data.chgName;
+  html += `<h3 class="modal-title">${escapeHtml(benFull)}卦 → ${escapeHtml(chgFull)}卦</h3>`;
   // Context line 1: palace + day/month + void
   html += `<div class="modal-context-line">`;
   html += `${hl(najia.palace.palace + '宫')} · ${escapeHtml(najia.palace.position)}`;
@@ -3979,6 +4034,14 @@ function openHistoryDetail(index) {
   }
   html += `</div>`;
 
+  // --- 断语/备注编辑 ---
+  const existingNote = record.note || '';
+  html += `<div class="modal-block"><div class="modal-label">断语与复盘</div>`;
+  html += `<textarea class="note-textarea" id="historyNoteTextarea" placeholder="记录断语、应验情况、复盘分析……">${escapeHtml(existingNote)}</textarea>`;
+  html += `<div class="review-actions" style="margin-top:0.6rem;">`;
+  html += `<button class="btn" type="button" onclick="saveHistoryNote(${index})">保存断语</button>`;
+  html += `</div></div>`;
+
   // --- 卦辞/爻辞 ---
   html += `<div class="modal-block"><div class="modal-label">卦辞与爻辞</div>`;
   for (let i = 0; i < data.results.length; i++) {
@@ -4008,6 +4071,44 @@ async function copyHistoryText(index) {
   if (!record) return;
   const text = formatDivinationText(buildDataFromRecord(record));
   await copyTextWithFallback(text, 'historyCopyBox');
+}
+
+function saveHistoryNote(index) {
+  const record = visibleHistoryCache[index];
+  if (!record) return;
+  const textarea = document.getElementById('historyNoteTextarea');
+  if (!textarea) return;
+  const note = textarea.value.trim();
+
+  // Find the original record in the full history and update it
+  const allHistory = getHistory();
+  const normalized = normalizeHistoryRecord(record);
+  const recordId = normalized.recordId;
+
+  for (let i = 0; i < allHistory.length; i++) {
+    const norm = normalizeHistoryRecord(allHistory[i]);
+    if (norm.recordId === recordId) {
+      allHistory[i].note = note;
+      saveHistory(allHistory);
+      visibleHistoryCache[index].note = note;
+      break;
+    }
+  }
+
+  // Re-render history list to show updated note badge
+  renderHistory();
+
+  // Update modal button to show saved feedback
+  const btn = event && event.target;
+  if (btn) {
+    const orig = btn.textContent;
+    btn.textContent = '已保存';
+    btn.style.color = '#9fe5ad';
+    setTimeout(() => {
+      btn.textContent = orig;
+      btn.style.color = '';
+    }, 1500);
+  }
 }
 
 function toDateTimeLocalValue(date) {
@@ -4513,6 +4614,11 @@ function codeToTrigrams(divCode) {
     if (bits.join('') === inner) neiName = name;
   }
   return { wai: waiName, nei: neiName };
+}
+
+function trigramNotation(divCode) {
+  const t = codeToTrigrams(divCode);
+  return t.wai && t.nei ? `上${t.wai}下${t.nei}` : '';
 }
 
 function buildEightPalaces() {
