@@ -784,7 +784,7 @@ body.modal-open {
 }
 .history-filters {
   display: grid;
-  grid-template-columns: 1.6fr 0.9fr 0.9fr;
+  grid-template-columns: 2fr 1.2fr 0.7fr 0.7fr;
   gap: 0.65rem;
   margin-bottom: 0.9rem;
 }
@@ -832,6 +832,49 @@ body.modal-open {
   font-size: 0.78rem;
   line-height: 1.5;
   font-style: italic;
+}
+.hi-archive-badge {
+  display: inline-flex;
+  padding: 0.12rem 0.45rem;
+  border-radius: 999px;
+  background: rgba(216, 186, 100, 0.1);
+  border: 1px solid rgba(216, 186, 100, 0.22);
+  color: var(--gold);
+  font-size: 0.68rem;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.hi-archive-badge:hover {
+  background: rgba(216, 186, 100, 0.2);
+  border-color: rgba(216, 186, 100, 0.4);
+}
+.archive-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.85rem 0.95rem;
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 14px;
+  background: rgba(255,255,255,0.02);
+  margin-bottom: 0.6rem;
+}
+.archive-row-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+.archive-row-title {
+  color: var(--text);
+  font-size: 0.95rem;
+}
+.archive-row-count {
+  color: var(--text-dim);
+  font-size: 0.76rem;
+}
+.archive-row-actions {
+  display: flex;
+  gap: 0.45rem;
 }
 .history-detail {
   display: none;
@@ -1167,6 +1210,21 @@ body.modal-open {
 .note-textarea::placeholder {
   color: var(--text-dim);
   font-style: italic;
+}
+.archive-select {
+  width: 100%;
+  background: rgba(10, 20, 37, 0.82);
+  border: 1px solid var(--panel-border);
+  border-radius: 12px;
+  color: var(--text);
+  font-family: inherit;
+  padding: 0.72rem 0.82rem;
+  font-size: 0.9rem;
+}
+.archive-select:focus {
+  outline: none;
+  border-color: rgba(216, 186, 100, 0.52);
+  box-shadow: 0 0 0 3px rgba(216, 186, 100, 0.12);
 }
 .sync-modal-body {
   padding: 0.5rem 0;
@@ -2051,6 +2109,7 @@ body.modal-open {
       <div class="history-header">
         <h3 id="historyTitle">历史记录</h3>
         <div class="history-btns">
+          <button class="btn-sm" onclick="openArchiveManager()">归档</button>
           <button class="btn-sm" onclick="showSyncDialog()">同步码</button>
           <button class="btn-sm" onclick="exportHistory()">导出</button>
           <button class="btn-sm" onclick="importHistory()">导入</button>
@@ -2058,11 +2117,14 @@ body.modal-open {
         </div>
       </div>
       <div class="history-filters">
-        <input type="text" id="historySearchInput" placeholder="搜索输入、本卦、变卦、解读文本" oninput="updateHistoryFilters()">
+        <input type="text" id="historySearchInput" placeholder="搜索输入、本卦、变卦、解读文本、断语" oninput="updateHistoryFilters()">
         <select id="historySourceFilter" onchange="updateHistoryFilters()">
           <option value="all">全部来源</option>
           <option value="auto">当下起卦</option>
           <option value="review">卦历复盘</option>
+        </select>
+        <select id="historyArchiveFilter" onchange="updateHistoryFilters()">
+          <option value="all">全部归档</option>
         </select>
         <select id="historyTimeFilter" onchange="updateHistoryFilters()">
           <option value="all">全部时间</option>
@@ -2198,6 +2260,20 @@ body.modal-open {
           <option value="500">500</option>
         </select>
       </label>
+    </div>
+  </div>
+</div>
+
+<div class="history-modal" id="archiveModal" hidden>
+  <div class="history-modal-backdrop" onclick="closeArchiveManager()"></div>
+  <div class="history-modal-card">
+    <button class="modal-close" type="button" onclick="closeArchiveManager()" aria-label="关闭">×</button>
+    <div class="modal-eyebrow">归档管理</div>
+    <h3 class="modal-title">我的归档</h3>
+    <div class="modal-meta">将历史记录整理到不同归档中，方便分类管理。</div>
+    <div id="archiveList"></div>
+    <div class="review-actions" style="margin-top:1rem;">
+      <button class="btn" type="button" onclick="createArchiveFromModal()">新建归档</button>
     </div>
   </div>
 </div>
@@ -3190,6 +3266,7 @@ const SYNC_QUEUE_STORAGE_PREFIX = 'wenshi-liuyao_sync_queue_v2';
 const SYNC_LAST_FETCH_STORAGE_PREFIX = 'wenshi-liuyao_last_sync_v2';
 const ANON_HISTORY_SCOPE = 'anon';
 const SETTINGS_KEY = 'wenshi-liuyao_settings_v1';
+const ARCHIVES_STORAGE_KEY = 'wenshi-liuyao_archives_v1';
 const DEFAULT_SETTINGS = {
   defaultExpandNajia: false,
   compactLayout: false,
@@ -3260,6 +3337,154 @@ function persistSettings() {
   localStorage.setItem(SETTINGS_KEY, JSON.stringify(currentSettings));
 }
 
+// ═══════════════════════════════════════════════════════════════
+// Archive (folder) management
+// ═══════════════════════════════════════════════════════════════
+
+function loadArchives() {
+  try {
+    const raw = localStorage.getItem(ARCHIVES_STORAGE_KEY);
+    return raw ? JSON.parse(raw) : [];
+  } catch {
+    return [];
+  }
+}
+
+function persistArchives(archives) {
+  localStorage.setItem(ARCHIVES_STORAGE_KEY, JSON.stringify(archives));
+}
+
+function createArchive(title) {
+  const archives = loadArchives();
+  const archive = {
+    id: 'arc_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8),
+    title: title.trim() || '未命名归档',
+    createdAt: new Date().toISOString()
+  };
+  archives.push(archive);
+  persistArchives(archives);
+  return archive;
+}
+
+function updateArchive(id, title) {
+  const archives = loadArchives();
+  for (const a of archives) {
+    if (a.id === id) {
+      a.title = title.trim() || a.title;
+      persistArchives(archives);
+      return a;
+    }
+  }
+  return null;
+}
+
+function deleteArchive(id) {
+  const archives = loadArchives();
+  const filtered = archives.filter(a => a.id !== id);
+  if (filtered.length !== archives.length) {
+    persistArchives(filtered);
+    // Unassign records from deleted archive
+    const history = getHistory();
+    let changed = false;
+    for (const record of history) {
+      if (record.archiveId === id) {
+        record.archiveId = '';
+        changed = true;
+      }
+    }
+    if (changed) persistHistory(history);
+    return true;
+  }
+  return false;
+}
+
+function assignRecordToArchive(recordId, archiveId) {
+  const history = getHistory();
+  for (let i = 0; i < history.length; i++) {
+    const norm = normalizeHistoryRecord(history[i]);
+    if (norm.recordId === recordId) {
+      history[i].archiveId = archiveId || '';
+      persistHistory(history);
+      return true;
+    }
+  }
+  return false;
+}
+
+function getArchiveById(id) {
+  return loadArchives().find(a => a.id === id) || null;
+}
+
+function countRecordsInArchive(archiveId) {
+  return getHistory().filter(r => r.archiveId === archiveId).length;
+}
+
+function openArchiveManager() {
+  renderArchiveList();
+  document.getElementById('archiveModal').hidden = false;
+  syncOverlayState();
+}
+
+function closeArchiveManager() {
+  document.getElementById('archiveModal').hidden = true;
+  syncOverlayState();
+}
+
+function renderArchiveList() {
+  const archives = loadArchives();
+  const container = document.getElementById('archiveList');
+  if (archives.length === 0) {
+    container.innerHTML = '<div style="color:var(--text-dim);font-size:0.82rem;text-align:center;padding:1.5rem 0;">还没有归档，点击下方按钮创建第一个归档。</div>';
+    return;
+  }
+  let html = '';
+  for (const arc of archives) {
+    const count = countRecordsInArchive(arc.id);
+    html += `<div class="archive-row">`;
+    html += `<div class="archive-row-info">`;
+    html += `<span class="archive-row-title">${escapeHtml(arc.title)}</span>`;
+    html += `<span class="archive-row-count">${count} 条记录</span>`;
+    html += `</div>`;
+    html += `<div class="archive-row-actions">`;
+    html += `<button class="btn-sm" onclick="renameArchive('${escapeHtml(arc.id)}')" title="重命名">重命名</button>`;
+    html += `<button class="btn-sm" onclick="deleteArchiveConfirm('${escapeHtml(arc.id)}', '${escapeHtml(arc.title)}')" title="删除">删除</button>`;
+    html += `</div></div>`;
+  }
+  container.innerHTML = html;
+}
+
+function createArchiveFromModal() {
+  const title = prompt('请输入归档标题：');
+  if (title === null) return;
+  if (!title.trim()) { alert('归档标题不能为空'); return; }
+  createArchive(title);
+  renderArchiveList();
+  populateArchiveFilter();
+}
+
+function renameArchive(id) {
+  const arc = getArchiveById(id);
+  if (!arc) return;
+  const title = prompt('重命名归档：', arc.title);
+  if (title === null) return;
+  updateArchive(id, title);
+  renderArchiveList();
+  populateArchiveFilter();
+  renderHistory();
+}
+
+function deleteArchiveConfirm(id, title) {
+  if (!confirm(`确定删除归档「${title}」？\n\n该归档下的记录将移回「未归档」。`)) return;
+  deleteArchive(id);
+  renderArchiveList();
+  populateArchiveFilter();
+  renderHistory();
+}
+
+// ═══════════════════════════════════════════════════════════════
+// History (localStorage)
+// ═══════════════════════════════════════════════════════════════
+
 function migrateLegacyHistory() {
   if (window.WenShiAuth && window.WenShiAuth.getUser()) return;
   try {
@@ -3317,6 +3542,7 @@ function getHistory() {
 
 function syncOverlayState() {
   const open = !document.getElementById('historyModal').hidden
+    || !document.getElementById('archiveModal').hidden
     || !document.getElementById('panelTextModal').hidden
     || !document.getElementById('settingsDrawer').hidden;
   document.body.classList.toggle('modal-open', open);
@@ -3619,12 +3845,38 @@ function getHistoryFilters() {
   return {
     query: (document.getElementById('historySearchInput').value || '').trim().toLowerCase(),
     source: document.getElementById('historySourceFilter').value,
+    archive: document.getElementById('historyArchiveFilter').value,
     time: document.getElementById('historyTimeFilter').value
   };
 }
 
 function updateHistoryFilters() {
   renderHistory();
+}
+
+function populateArchiveFilter() {
+  const select = document.getElementById('historyArchiveFilter');
+  if (!select) return;
+  const archives = loadArchives();
+  const currentValue = select.value;
+  let html = '<option value="all">全部归档</option>';
+  html += `<option value="__unfiled__">未归档</option>`;
+  for (const arc of archives) {
+    html += `<option value="${escapeHtml(arc.id)}">${escapeHtml(arc.title)}</option>`;
+  }
+  select.innerHTML = html;
+  // Restore selection if still valid
+  if ([...select.options].some(o => o.value === currentValue)) {
+    select.value = currentValue;
+  }
+}
+
+function filterByArchive(archiveId) {
+  const select = document.getElementById('historyArchiveFilter');
+  if (select) select.value = archiveId;
+  renderHistory();
+  // Scroll to top of history list
+  document.getElementById('historyList').scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
 function applyHistoryFilters(records) {
@@ -3639,6 +3891,7 @@ function applyHistoryFilters(records) {
 
   return records.filter(record => {
     if (filters.source !== 'all' && record.source !== filters.source) return false;
+    if (filters.archive !== 'all' && record.archiveId !== filters.archive) return false;
     if (filters.time !== 'all') {
       const timestamp = new Date(record.timestamp).getTime();
       if (timestamp < timeLimits[filters.time]) return false;
@@ -3665,6 +3918,8 @@ function renderHistory() {
     ? `历史记录（${allHistory.length}）`
     : `历史记录（${history.length}/${allHistory.length}）`;
 
+  populateArchiveFilter();
+
   if (history.length === 0) {
     list.innerHTML = '<div style="color:var(--text-dim);font-size:0.8rem;text-align:center;padding:1rem;">没有匹配的记录</div>';
     return;
@@ -3682,12 +3937,17 @@ function renderHistory() {
     const benFull = benNotation ? `${r.benName}（${benNotation}）` : r.benName;
     const chgFull = chgNotation ? `${r.chgName}（${chgNotation}）` : r.chgName;
     const noteBadge = r.note ? `<span class="hi-note-badge">📝</span>` : '';
+    const arcBadge = r.archiveId ? (() => {
+      const arc = getArchiveById(r.archiveId);
+      return arc ? `<span class="hi-archive-badge" onclick="event.stopPropagation(); filterByArchive('${escapeHtml(arc.id)}')" title="${escapeHtml(arc.title)}">${escapeHtml(arc.title)}</span>` : '';
+    })() : '';
 
     html += `<div class="history-item" onclick="openHistoryDetail(${i})">`;
     html += `<button class="history-item-delete" onclick="event.stopPropagation(); deleteHistoryRecord(${i})" title="删除" aria-label="删除记录">&times;</button>`;
     html += `<div class="history-item-top">`;
     html += `<span class="hi-time">${r.dateStr} ${timeStr} ${r.shichen}</span>`;
     html += `<span class="history-badge">${escapeHtml(r.sourceLabel)}</span>`;
+    html += `${arcBadge}`;
     html += `</div>`;
     html += `<div class="hi-input">${inputDisplay}</div>`;
     html += `<div class="hi-gua">${escapeHtml(benFull)}卦 → ${escapeHtml(chgFull)}卦（变${r.chgsum}爻）${noteBadge}</div>`;
@@ -3967,6 +4227,7 @@ async function saveCurrentScreenshot() {
 function openHistoryDetail(index) {
   const record = visibleHistoryCache[index];
   if (!record) return;
+  window.__currentModalRecord = record;
   const data = buildDataFromRecord(record);
   const najia = buildNajiaDetails(data);
 
@@ -4024,6 +4285,11 @@ function openHistoryDetail(index) {
     html += `<div class="modal-detail-row"><span class="mdl-label">月日关系</span><span class="mdl-value">${escapeHtml(relMarkers)}</span></div>`;
     html += `</div>`;
   }
+
+  // --- Archive assignment ---
+  html += `<div class="modal-block"><div class="modal-label">归档</div>`;
+  html += buildArchivePickerHtml(record.archiveId || '');
+  html += `</div>`;
 
   // --- Action buttons ---
   html += `<div class="review-actions modal-actions-primary">`;
@@ -4103,6 +4369,57 @@ function saveHistoryNote(index) {
   if (btn) {
     const orig = btn.textContent;
     btn.textContent = '已保存';
+    btn.style.color = '#9fe5ad';
+    setTimeout(() => {
+      btn.textContent = orig;
+      btn.style.color = '';
+    }, 1500);
+  }
+}
+
+function buildArchivePickerHtml(currentArchiveId) {
+  const archives = loadArchives();
+  let html = '<select class="archive-select" id="archivePickerSelect">';
+  html += `<option value="">未归档</option>`;
+  for (const arc of archives) {
+    const selected = arc.id === currentArchiveId ? ' selected' : '';
+    html += `<option value="${escapeHtml(arc.id)}"${selected}>${escapeHtml(arc.title)}</option>`;
+  }
+  html += `</select>`;
+  html += `<div class="review-actions" style="margin-top:0.5rem;">`;
+  html += `<button class="btn" type="button" onclick="saveHistoryArchive()">保存归档</button>`;
+  html += `</div>`;
+  return html;
+}
+
+function saveHistoryArchive() {
+  const select = document.getElementById('archivePickerSelect');
+  if (!select) return;
+  const archiveId = select.value;
+
+  // Find the current modal's record via the visibleHistoryCache
+  // We need to pass the index somehow — use a global
+  const record = window.__currentModalRecord;
+  if (!record) return;
+
+  const normalized = normalizeHistoryRecord(record);
+  const recordId = normalized.recordId;
+
+  assignRecordToArchive(recordId, archiveId);
+
+  // Update cache
+  record.archiveId = archiveId;
+  const idx = visibleHistoryCache.indexOf(record);
+  if (idx >= 0) visibleHistoryCache[idx].archiveId = archiveId;
+
+  // Re-render
+  renderHistory();
+
+  // Feedback
+  const btn = event && event.target;
+  if (btn) {
+    const orig = btn.textContent;
+    btn.textContent = archiveId ? '已归档' : '已移除归档';
     btn.style.color = '#9fe5ad';
     setTimeout(() => {
       btn.textContent = orig;
@@ -5127,6 +5444,10 @@ syncOverlayState();
 
 document.addEventListener('keydown', function(e) {
   if (e.key !== 'Escape') return;
+  if (!document.getElementById('archiveModal').hidden) {
+    closeArchiveManager();
+    return;
+  }
   if (!document.getElementById('settingsDrawer').hidden) {
     closeSettingsDrawer();
     return;
