@@ -1,8 +1,8 @@
 {
   "name": "wenshi-liuyao",
   "framework": null,
-  "buildCommand": null,
-  "outputDirectory": ".",
+  "buildCommand": "npm run build",
+  "outputDirectory": "dist",
   "devCommand": null,
   "installCommand": null,
   "rewrites": [

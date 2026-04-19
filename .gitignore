@@ -2,6 +2,9 @@
 .vercel
 node_modules
 
+# Build output
+dist/
+
 # OS
 .DS_Store
 Thumbs.db
@@ -12,5 +15,3 @@ Thumbs.db
 
 # Tauri (optional, not used for web deployment)
 wenshi-liuyao-tauri/
-
-.vercel
