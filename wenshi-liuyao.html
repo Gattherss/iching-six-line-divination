@@ -384,6 +384,138 @@ body.modal-open {
   background: rgba(94, 167, 239, 0.08);
   border-color: rgba(94, 167, 239, 0.22);
 }
+.hexagram-overview {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 4.8rem minmax(0, 1fr);
+  gap: 0.82rem;
+  align-items: stretch;
+  padding: 1rem;
+}
+.hexagram-column {
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 20px;
+  overflow: hidden;
+  background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.015));
+}
+.hexagram-column.ben {
+  background: linear-gradient(180deg, rgba(216, 186, 100, 0.08), rgba(255,255,255,0.015));
+}
+.hexagram-column.chg {
+  background: linear-gradient(180deg, rgba(94, 167, 239, 0.08), rgba(255,255,255,0.015));
+}
+.hexagram-column-head {
+  min-height: 5.1rem;
+  padding: 0.82rem 0.88rem 0.72rem;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+.hexagram-column-label {
+  color: var(--text-dim);
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.hexagram-column-name {
+  color: var(--gold);
+  font-size: 1.26rem;
+  line-height: 1.2;
+  margin-top: 0.22rem;
+}
+.hexagram-column-note {
+  color: var(--text-dim);
+  font-size: 0.74rem;
+  line-height: 1.45;
+  margin-top: 0.2rem;
+}
+.hexagram-line-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.44rem;
+  padding: 0.75rem 0.82rem 0.82rem;
+}
+.hexagram-line-row {
+  min-height: 1.95rem;
+  border-radius: 14px;
+  border: 1px solid transparent;
+  background: rgba(255,255,255,0.02);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.hexagram-line-row.is-changing {
+  border-color: rgba(233, 69, 96, 0.24);
+  background: rgba(233, 69, 96, 0.09);
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,0.02);
+}
+.hexagram-column.chg .hexagram-line-row.is-changing {
+  border-color: rgba(94, 167, 239, 0.28);
+  background: rgba(94, 167, 239, 0.11);
+}
+.hexagram-symbol {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.hexagram-line-seg {
+  display: block;
+  height: 0.34rem;
+  border-radius: 999px;
+  box-shadow: 0 0 0 1px rgba(255,255,255,0.03), 0 4px 10px rgba(0,0,0,0.18);
+}
+.hexagram-symbol-yang .hexagram-line-seg {
+  width: 5.45rem;
+  background: linear-gradient(90deg, #f5dfa0, #d8ba64);
+}
+.hexagram-symbol-yin .hexagram-line-seg {
+  width: 2.28rem;
+  background: linear-gradient(90deg, #d5e7f5, #89b4db);
+}
+.hexagram-line-gap {
+  width: 0.8rem;
+}
+.hexagram-change-rail {
+  display: flex;
+  flex-direction: column;
+  gap: 0.44rem;
+  justify-content: flex-start;
+  padding-block: 5.85rem 0.82rem;
+}
+.hexagram-change-chip {
+  min-height: 1.95rem;
+  border-radius: 14px;
+  border: 1px solid rgba(255,255,255,0.12);
+  background: rgba(255,255,255,0.04);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 0.18rem 0.15rem;
+  text-align: center;
+}
+.hexagram-change-chip.active {
+  color: #ffd6dc;
+  background: rgba(233, 69, 96, 0.15);
+  border-color: rgba(233, 69, 96, 0.3);
+}
+.hexagram-change-chip.idle {
+  color: #b8d7fb;
+  background: rgba(94, 167, 239, 0.08);
+  border-color: rgba(94, 167, 239, 0.22);
+}
+.hexagram-change-label {
+  font-size: 0.64rem;
+  line-height: 1.1;
+  color: inherit;
+}
+.hexagram-change-state {
+  margin-top: 0.12rem;
+  font-size: 0.86rem;
+  line-height: 1;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+}
 .info-line {
   text-align: center;
   color: var(--text-dim);
@@ -1593,6 +1725,49 @@ body.modal-open {
   .change-pill {
     min-width: 0;
   }
+  .hexagram-overview {
+    grid-template-columns: minmax(0, 1fr) 4rem minmax(0, 1fr);
+    gap: 0.58rem;
+    padding: 0.82rem;
+  }
+  .hexagram-column-head {
+    min-height: 4.45rem;
+    padding: 0.72rem 0.7rem 0.62rem;
+  }
+  .hexagram-column-name {
+    font-size: 1.06rem;
+  }
+  .hexagram-column-note {
+    font-size: 0.68rem;
+  }
+  .hexagram-line-list {
+    gap: 0.38rem;
+    padding: 0.62rem 0.62rem 0.68rem;
+  }
+  .hexagram-line-row,
+  .hexagram-change-chip {
+    min-height: 1.72rem;
+    border-radius: 12px;
+  }
+  .hexagram-symbol-yang .hexagram-line-seg {
+    width: 4.45rem;
+  }
+  .hexagram-symbol-yin .hexagram-line-seg {
+    width: 1.82rem;
+  }
+  .hexagram-line-gap {
+    width: 0.66rem;
+  }
+  .hexagram-change-rail {
+    gap: 0.38rem;
+    padding-block: 5.07rem 0.68rem;
+  }
+  .hexagram-change-label {
+    font-size: 0.58rem;
+  }
+  .hexagram-change-state {
+    font-size: 0.76rem;
+  }
   .settings-panel {
     width: min(100vw, 30rem);
   }
@@ -1619,6 +1794,54 @@ body.modal-open {
   }
   .result-gua-name {
     font-size: 1.35rem;
+  }
+  .hexagram-overview {
+    grid-template-columns: minmax(0, 1fr) 3.35rem minmax(0, 1fr);
+    gap: 0.44rem;
+    padding: 0.7rem;
+  }
+  .hexagram-column-head {
+    min-height: 4rem;
+    padding: 0.62rem 0.55rem 0.54rem;
+  }
+  .hexagram-column-label {
+    font-size: 0.64rem;
+  }
+  .hexagram-column-name {
+    font-size: 0.94rem;
+  }
+  .hexagram-column-note {
+    font-size: 0.62rem;
+  }
+  .hexagram-line-list {
+    gap: 0.34rem;
+    padding: 0.52rem;
+  }
+  .hexagram-line-row,
+  .hexagram-change-chip {
+    min-height: 1.56rem;
+    border-radius: 11px;
+  }
+  .hexagram-symbol-yang .hexagram-line-seg {
+    width: 3.62rem;
+    height: 0.3rem;
+  }
+  .hexagram-symbol-yin .hexagram-line-seg {
+    width: 1.48rem;
+    height: 0.3rem;
+  }
+  .hexagram-line-gap {
+    width: 0.52rem;
+  }
+  .hexagram-change-rail {
+    gap: 0.34rem;
+    padding-block: 4.52rem 0.52rem;
+  }
+  .hexagram-change-label {
+    font-size: 0.54rem;
+  }
+  .hexagram-change-state {
+    font-size: 0.72rem;
   }
   .najia-visual-grid,
   .najia-table-content {
@@ -2099,7 +2322,7 @@ body.modal-open {
   async function flushSyncQueue() {
     if (!isOnline || !supabaseUser || !supabaseClient || syncQueue.length === 0) return;
     var inserts = syncQueue.filter(function(op) { return op.type === 'insert'; }).map(function(op) { return op.record; });
-    var deletes = syncQueue.filter(function(op) { return op.type === 'delete_ts'; }).map(function(op) { return op.ts; });
+    var deletes = syncQueue.filter(function(op) { return op.type === 'delete_record' || op.type === 'delete_ts'; });
     try {
       if (inserts.length > 0) await pushToSupabase(inserts);
       if (deletes.length > 0) await deleteFromSupabase(deletes);
@@ -2113,32 +2336,53 @@ body.modal-open {
   async function pushToSupabase(records) {
     if (!supabaseClient || !supabaseUser) return;
     var rows = records.map(function(r) {
+      var normalized = typeof normalizeHistoryRecord === 'function' ? normalizeHistoryRecord(r) : r;
       return {
         user_id: supabaseUser.id,
-        timestamp: r.timestamp,
-        shichen: r.shichen,
-        date_str: r.dateStr,
-        input: r.input,
-        ben_name: r.benName,
-        chg_name: r.chgName,
-        div_code: r.divCode,
-        chg_code: r.chgCode,
-        chgsum: r.chgsum,
-        results: r.results,
-        names: r.names,
-        lines: r.lines,
-        source: r.source,
-        source_label: r.sourceLabel
+        timestamp: normalized.timestamp,
+        local_timestamp: normalized.localTimestamp || '',
+        record_id: normalized.recordId || (typeof getHistoryRecordKey === 'function' ? getHistoryRecordKey(normalized) : normalized.timestamp),
+        shichen: normalized.shichen,
+        date_str: normalized.dateStr,
+        input: normalized.input,
+        ben_name: normalized.benName,
+        chg_name: normalized.chgName,
+        div_code: normalized.divCode,
+        chg_code: normalized.chgCode,
+        chgsum: normalized.chgsum,
+        results: normalized.results,
+        names: normalized.names,
+        lines: normalized.lines,
+        source: normalized.source,
+        source_label: normalized.sourceLabel
       };
     });
-    var result = await supabaseClient.from('hexagram_history').upsert(rows, { onConflict: 'user_id,timestamp' }).select('id');
+    var result = await supabaseClient.from('hexagram_history').upsert(rows, { onConflict: 'user_id,record_id' }).select('id');
     if (result.error) console.warn('Push error:', result.error);
   }
 
-  async function deleteFromSupabase(timestamps) {
+  async function deleteFromSupabase(deletions) {
     if (!supabaseClient || !supabaseUser) return;
-    var result = await supabaseClient.from('hexagram_history').delete().eq('user_id', supabaseUser.id).in('timestamp', timestamps);
-    if (result.error) console.warn('Delete error:', result.error);
+    var recordIds = [];
+    var timestamps = [];
+    for (var i = 0; i < deletions.length; i++) {
+      var item = deletions[i];
+      if (typeof item === 'string') {
+        timestamps.push(item);
+        continue;
+      }
+      if (!item || typeof item !== 'object') continue;
+      if (item.recordId) recordIds.push(item.recordId);
+      if (item.ts) timestamps.push(item.ts);
+    }
+    if (recordIds.length > 0) {
+      var byRecordId = await supabaseClient.from('hexagram_history').delete().eq('user_id', supabaseUser.id).in('record_id', recordIds);
+      if (byRecordId.error) console.warn('Delete error:', byRecordId.error);
+    }
+    if (timestamps.length > 0) {
+      var byTimestamp = await supabaseClient.from('hexagram_history').delete().eq('user_id', supabaseUser.id).in('timestamp', timestamps);
+      if (byTimestamp.error) console.warn('Delete error:', byTimestamp.error);
+    }
   }
 
   async function fetchFromSupabase(sinceTimestamp) {
@@ -2150,6 +2394,8 @@ body.modal-open {
     return (result.data || []).map(function(row) {
       return {
         timestamp: row.timestamp,
+        localTimestamp: row.local_timestamp,
+        recordId: row.record_id,
         shichen: row.shichen,
         dateStr: row.date_str,
         input: row.input,
@@ -2182,16 +2428,16 @@ body.modal-open {
     if (!supabaseUser) return;
     try {
       var cloudRecords = await fetchFromSupabase();
-      var localRecords = getRawHistory();
+      var localRecords = getHistory();
       var mergeMap = {};
       for (var i = 0; i < localRecords.length; i++) {
         var r = localRecords[i];
-        var key = r.timestamp + '|' + (r.input || '');
+        var key = getHistoryRecordKey(r);
         mergeMap[key] = r;
       }
       for (var j = 0; j < cloudRecords.length; j++) {
         var cr = cloudRecords[j];
-        var ckey = cr.timestamp + '|' + (cr.input || '');
+        var ckey = getHistoryRecordKey(cr);
         mergeMap[ckey] = cr;
       }
       var merged = [];
@@ -2228,13 +2474,13 @@ body.modal-open {
     var record = visibleHistoryCache[index];
     var allHistory = getHistory();
     var ts = record.timestamp;
-    var input = record.input || '';
+    var recordKey = getHistoryRecordKey(record);
     if (!confirm('确定删除这条记录？\n\n' + record.dateStr + ' ' + record.benName + '卦 → ' + record.chgName + '卦')) return;
-    var filtered = allHistory.filter(function(r) { return !(r.timestamp === ts && (r.input || '') === input); });
+    var filtered = allHistory.filter(function(r) { return getHistoryRecordKey(r) !== recordKey; });
     persistHistory(filtered);
     if (typeof renderHistory === 'function') renderHistory();
     if (supabaseUser && supabaseClient) {
-      syncQueue.push({ type: 'delete_ts', ts: ts });
+      syncQueue.push({ type: 'delete_record', recordId: recordKey, ts: ts });
       persistSyncQueue(syncQueue);
       clearTimeout(syncFlushTimer);
       syncFlushTimer = setTimeout(flushSyncQueue, 2000);
@@ -2521,8 +2767,11 @@ function buildDivinationData({ now, userInput, lines, source = 'auto', sourceLab
 }
 
 function buildHistoryRecord(data) {
+  const timestamp = data.now.toISOString();
+  const localTimestamp = toDateTimeLocalValue(data.now);
   return {
-    timestamp: data.now.toISOString(),
+    timestamp,
+    localTimestamp,
     shichen: data.shichen.name,
     dateStr: data.shichen.dateStr,
     input: data.userInput,
@@ -2540,7 +2789,15 @@ function buildHistoryRecord(data) {
       isChanging: line.isChanging
     })),
     source: data.source,
-    sourceLabel: data.sourceLabel
+    sourceLabel: data.sourceLabel,
+    recordId: [
+      timestamp,
+      localTimestamp,
+      data.userInput || '',
+      data.divCode,
+      data.chgCode,
+      data.source || 'auto'
+    ].join('|')
   };
 }
 
@@ -2623,39 +2880,60 @@ function renderMiniLineSymbol(bit) {
   return `<div class="mini-yao mini-yao-yin"><span class="mini-yao-seg"></span><span class="mini-yao-gap"></span><span class="mini-yao-seg"></span></div>`;
 }
 
-function renderLineComparisonBoard(data, najia = buildNajiaDetails(data), extraClass = '') {
-  let html = `<div class="yao-compare ${extraClass}">`;
-  html += `<div class="yao-compare-head"><span>本卦</span><span>动变</span><span>变卦</span></div>`;
-  html += `<div class="yao-compare-grid">`;
+function renderHexagramLineSymbol(bit) {
+  if (bit === 1) {
+    return `<div class="hexagram-symbol hexagram-symbol-yang"><span class="hexagram-line-seg"></span></div>`;
+  }
+  return `<div class="hexagram-symbol hexagram-symbol-yin"><span class="hexagram-line-seg"></span><span class="hexagram-line-gap"></span><span class="hexagram-line-seg"></span></div>`;
+}
 
+function renderHexagramColumn(data, col, title, name, note) {
+  let html = `<div class="hexagram-column ${col}">`;
+  html += `<div class="hexagram-column-head">`;
+  html += `<span class="hexagram-column-label">${escapeHtml(title)}</span>`;
+  html += `<span class="hexagram-column-name">${escapeHtml(name)}</span>`;
+  if (note) {
+    html += `<span class="hexagram-column-note">${escapeHtml(note)}</span>`;
+  }
+  html += `</div>`;
+  html += `<div class="hexagram-line-list">`;
   for (let i = 0; i < 6; i++) {
-    const line = data.lines[i];
-    const shiYing = formatShiYingLabel(najia.palace, i);
-    const benMeta = `${najia.benLiuQin[i]} ${najia.benNajia[i].zhi}${najia.benNajia[i].zhiWu}${shiYing !== '—' ? ` · ${shiYing}` : ''}`;
-    const chgMeta = `${najia.chgLiuQin[i]} ${najia.chgNajia[i].zhi}${najia.chgNajia[i].zhiWu}${shiYing !== '—' ? ` · ${shiYing}` : ''}`;
-    const changeText = line.isChanging ? `${line.name}` : '静爻';
-
-    html += `<div class="yao-compare-row">`;
-    html += `<div class="yao-side-card ben">`;
-    html += `<div class="yao-side-title">${YAO_NAMES[i]}爻</div>`;
-    html += `<div class="yao-side-meta">${escapeHtml(benMeta)}</div>`;
-    html += `<div class="yao-side-symbol">${renderMiniLineSymbol(line.ben)}</div>`;
-    html += `</div>`;
-
-    html += `<div class="yao-change-col">`;
-    html += `<span class="change-pill ${line.isChanging ? 'active' : 'idle'}">${escapeHtml(changeText)}</span>`;
-    html += `</div>`;
-
-    html += `<div class="yao-side-card chg">`;
-    html += `<div class="yao-side-title">${YAO_NAMES[i]}爻</div>`;
-    html += `<div class="yao-side-meta">${escapeHtml(chgMeta)}</div>`;
-    html += `<div class="yao-side-symbol">${renderMiniLineSymbol(line.bian)}</div>`;
-    html += `</div>`;
+    const bit = col === 'ben' ? data.lines[i].ben : data.lines[i].bian;
+    html += `<div class="hexagram-line-row ${data.lines[i].isChanging ? 'is-changing' : 'is-static'}">`;
+    html += renderHexagramLineSymbol(bit);
     html += `</div>`;
   }
-
   html += `</div></div>`;
   return html;
+}
+
+function renderMobileComparisonBoard(data, najia = buildNajiaDetails(data), extraClass = '') {
+  const palaceText = najia && najia.palace
+    ? `${najia.palace.palace}宫 · ${najia.palace.position}`
+    : '';
+  const changeSummary = data.chgsum > 0
+    ? `动 ${data.chgsum} 爻`
+    : '六爻不变';
+
+  let html = `<div class="yao-compare ${extraClass}">`;
+  html += `<div class="hexagram-overview">`;
+  html += renderHexagramColumn(data, 'ben', '本卦', data.benName, palaceText);
+  html += `<div class="hexagram-change-rail">`;
+  for (let i = 0; i < 6; i++) {
+    const line = data.lines[i];
+    html += `<div class="hexagram-change-chip ${line.isChanging ? 'active' : 'idle'}">`;
+    html += `<span class="hexagram-change-label">${YAO_NAMES[i]}爻</span>`;
+    html += `<span class="hexagram-change-state">${line.isChanging ? '变' : '静'}</span>`;
+    html += `</div>`;
+  }
+  html += `</div>`;
+  html += renderHexagramColumn(data, 'chg', '变卦', data.chgName, changeSummary);
+  html += `</div></div>`;
+  return html;
+}
+
+function renderLineComparisonBoard(data, najia = buildNajiaDetails(data), extraClass = '') {
+  return renderMobileComparisonBoard(data, najia, extraClass);
 }
 
 function summarizeShiYing(palace) {
@@ -2726,11 +3004,6 @@ function renderResult(data) {
 
   let html = '<div class="result-card">';
 
-  // Prep text
-  html += `<div class="divination-text">`;
-  html += `<div class="prep">${data.prep1}<br>${data.prep2}</div>`;
-  html += `</div>`;
-
   // Time info
   html += `<div class="info-line"><span class="source-pill">${escapeHtml(data.sourceLabel || '当下起卦')}</span></div>`;
   html += `<div class="info-line">${data.shichen.dateStr} ${timeStr} ${data.shichen.name}</div>`;
@@ -2738,32 +3011,17 @@ function renderResult(data) {
     html += `<div class="info-line" style="color:var(--text-dim);font-size:0.8rem;">输入：${escapeHtml(data.userInput)}</div>`;
   }
 
-  html += `<div class="result-gua-strip">`;
-  html += `<div class="result-gua-card">`;
-  html += `<div class="result-gua-label">本卦</div>`;
-  html += `<div class="result-gua-name">${escapeHtml(data.benName)}</div>`;
-  html += `<div class="result-gua-meta">${escapeHtml(`${najia.palace.palace}宫 · ${najia.palace.position}`)}</div>`;
-  html += `</div>`;
-  html += `<div class="result-gua-center">之</div>`;
-  html += `<div class="result-gua-card">`;
-  html += `<div class="result-gua-label">变卦</div>`;
-  html += `<div class="result-gua-name">${escapeHtml(data.chgName)}</div>`;
-  html += `<div class="result-gua-meta">变${data.chgsum}爻</div>`;
-  html += `</div>`;
-  html += `</div>`;
+  html += renderMobileComparisonBoard(data, najia, 'result-overview');
 
   html += renderMetaRibbon([
     { label: '动爻', value: summarizeChangingLines(data.lines) },
     { label: '世应', value: summarizeShiYing(najia.palace) },
-    { label: '时日', value: `${najia.dayGZ.ganName}${najia.dayGZ.zhiName}日 · ${najia.monthZhiName}月 · ${najia.xunKong.join('')}空` },
-    { label: '卦位', value: `${najia.palace.palace}宫 · ${najia.palace.position}` }
+    { label: '时日', value: `${najia.dayGZ.ganName}${najia.dayGZ.zhiName}日 · ${najia.monthZhiName}月 · ${najia.xunKong.join('')}空` }
   ], 'result-meta-ribbon');
-
-  // Visual comparison board
-  html += renderLineComparisonBoard(data, najia);
 
   // Divination text
   html += `<div class="divination-text">`;
+  html += `<div class="prep">${data.prep1}<br>${data.prep2}</div>`;
   if (data.results.length > 1) {
     html += `<div class="gua-label">${data.elaborate}</div>`;
   }
@@ -2884,7 +3142,16 @@ function migrateLegacyHistory() {
 }
 
 function persistHistory(history) {
-  const limited = history.slice(0, currentSettings.historyLimit);
+  const normalized = [];
+  const seen = new Set();
+  for (const record of history) {
+    const normalizedRecord = stripHistoryTransientFields(normalizeHistoryRecord(record));
+    const key = getHistoryRecordKey(normalizedRecord);
+    if (seen.has(key)) continue;
+    seen.add(key);
+    normalized.push(normalizedRecord);
+  }
+  const limited = normalized.slice(0, currentSettings.historyLimit);
   localStorage.setItem(getScopedHistoryKey(), JSON.stringify(limited));
   return limited;
 }
@@ -2895,10 +3162,16 @@ function getHistory() {
     const raw = localStorage.getItem(getScopedHistoryKey());
     const parsed = raw ? JSON.parse(raw) : [];
     if (!Array.isArray(parsed)) return [];
+    const normalized = parsed.map(function(record) {
+      return stripHistoryTransientFields(normalizeHistoryRecord(record));
+    });
+    if (JSON.stringify(normalized) !== JSON.stringify(parsed)) {
+      return persistHistory(normalized);
+    }
     if (parsed.length > currentSettings.historyLimit) {
       return persistHistory(parsed);
     }
-    return parsed;
+    return normalized;
   } catch {
     return [];
   }
@@ -3019,22 +3292,184 @@ async function saveToHistory(record) {
   renderHistory();
 }
 
+function getHistoryString(value) {
+  return typeof value === 'string' ? value.trim() : '';
+}
+
+function getRecoveredHistoryInput(record) {
+  if (!record || typeof record !== 'object') return '';
+  const candidates = [
+    record.input,
+    record.userInput,
+    record.question,
+    record.query,
+    record.queryText,
+    record.prompt,
+    record.content,
+    record.text,
+    record.seedText,
+    record.reviewInput
+  ];
+  for (const candidate of candidates) {
+    const text = getHistoryString(candidate);
+    if (text) return text;
+  }
+  return '';
+}
+
+function normalizeHistoryDateStr(value) {
+  const text = getHistoryString(value);
+  if (!text) return '';
+  const match = text.match(/(\d{4})\D+(\d{1,2})\D+(\d{1,2})/);
+  if (!match) return '';
+  return `${match[1]}年${match[2].padStart(2, '0')}月${match[3].padStart(2, '0')}日`;
+}
+
+function normalizeHistoryShichen(value) {
+  const text = getHistoryString(value);
+  if (!text) return '';
+  return text.endsWith('时') ? text : `${text.charAt(0)}时`;
+}
+
+function isValidHistoryDate(date) {
+  return date instanceof Date && !Number.isNaN(date.getTime());
+}
+
+function parseHistoryDateValue(value) {
+  const text = getHistoryString(value);
+  if (!text) return null;
+  const parsed = new Date(text);
+  return isValidHistoryDate(parsed) ? parsed : null;
+}
+
+function getHistoryShichenHour(label) {
+  const normalized = normalizeHistoryShichen(label);
+  if (!normalized) return null;
+  const branch = normalized.charAt(0);
+  for (let i = 0; i < DIZHI.length; i++) {
+    const item = String(DIZHI[i] || '');
+    if (item && item.charAt(0) === branch) {
+      return i === 0 ? 23 : i * 2;
+    }
+  }
+  return null;
+}
+
+function buildHistoryDisplayDate(dateStr, shichen, fallbackDate) {
+  const normalizedDate = normalizeHistoryDateStr(dateStr);
+  if (!normalizedDate) return null;
+  const match = normalizedDate.match(/(\d{4})年(\d{2})月(\d{2})日/);
+  if (!match) return null;
+  const hour = getHistoryShichenHour(shichen);
+  const minute = isValidHistoryDate(fallbackDate) ? fallbackDate.getMinutes() : 0;
+  const second = isValidHistoryDate(fallbackDate) ? fallbackDate.getSeconds() : 0;
+  return new Date(
+    Number(match[1]),
+    Number(match[2]) - 1,
+    Number(match[3]),
+    hour == null ? 12 : hour,
+    minute,
+    second,
+    0
+  );
+}
+
+function resolveHistoryDisplayContext(record) {
+  const parsedTimestamp = parseHistoryDateValue(record && record.timestamp);
+  const parsedLocalTimestamp = parseHistoryDateValue(record && record.localTimestamp);
+  const storedDateStr = normalizeHistoryDateStr(record && record.dateStr);
+  const storedShichen = normalizeHistoryShichen(record && record.shichen);
+  let now = parsedLocalTimestamp || parsedTimestamp;
+  let usedStoredMeta = false;
+
+  if (storedDateStr && storedShichen) {
+    const derived = isValidHistoryDate(now) ? getShichenInfo(now) : null;
+    const hasMismatch = !derived
+      || normalizeHistoryDateStr(derived.dateStr) !== storedDateStr
+      || normalizeHistoryShichen(derived.name) !== storedShichen;
+    if (hasMismatch) {
+      const rebuilt = buildHistoryDisplayDate(storedDateStr, storedShichen, now);
+      if (rebuilt) {
+        now = rebuilt;
+        usedStoredMeta = true;
+      }
+    }
+  }
+
+  if (!isValidHistoryDate(now) && storedDateStr) {
+    now = buildHistoryDisplayDate(storedDateStr, storedShichen, null);
+    usedStoredMeta = true;
+  }
+
+  if (!isValidHistoryDate(now)) now = new Date();
+  const shichenInfo = getShichenInfo(now);
+  return {
+    now,
+    dateStr: storedDateStr || shichenInfo.dateStr,
+    shichen: storedShichen || shichenInfo.name,
+    usedStoredMeta
+  };
+}
+
+function getHistoryRecordKey(record) {
+  if (record && getHistoryString(record.recordId)) return getHistoryString(record.recordId);
+  return [
+    getHistoryString(record && record.timestamp),
+    getHistoryString(record && record.localTimestamp),
+    normalizeHistoryDateStr(record && record.dateStr),
+    normalizeHistoryShichen(record && record.shichen),
+    getRecoveredHistoryInput(record),
+    getHistoryString(record && record.divCode),
+    getHistoryString(record && record.chgCode),
+    getHistoryString(record && record.source)
+  ].join('|');
+}
+
+function stripHistoryTransientFields(record) {
+  const copy = { ...record };
+  delete copy._displayNow;
+  delete copy._usedStoredMeta;
+  return copy;
+}
+
 function normalizeHistoryRecord(record) {
+  record = record && typeof record === 'object' ? record : {};
   const lines = Array.isArray(record.lines) && record.lines.length === 6
     ? normalizeLines(record.lines)
     : reconstructLinesFromCodes(record.divCode, record.chgCode);
+  const displayContext = resolveHistoryDisplayContext(record);
+  const input = getRecoveredHistoryInput(record);
+  const timestamp = getHistoryString(record.timestamp) || displayContext.now.toISOString();
+  const localTimestamp = getHistoryString(record.localTimestamp) || toDateTimeLocalValue(displayContext.now);
+  const source = record.source || 'auto';
+  const sourceLabel = record.sourceLabel || (source === 'review' ? '卦历复盘' : '当下起卦');
   return {
     ...record,
+    timestamp,
+    localTimestamp,
+    input,
+    dateStr: displayContext.dateStr,
+    shichen: displayContext.shichen,
     lines,
-    source: record.source || 'auto',
-    sourceLabel: record.sourceLabel || (record.source === 'review' ? '卦历复盘' : '当下起卦')
+    source,
+    sourceLabel,
+    recordId: getHistoryString(record.recordId) || [
+      timestamp,
+      localTimestamp,
+      input,
+      getHistoryString(record.divCode),
+      getHistoryString(record.chgCode),
+      source
+    ].join('|'),
+    _displayNow: displayContext.now,
+    _usedStoredMeta: displayContext.usedStoredMeta
   };
 }
 
 function buildDataFromRecord(record) {
   const normalized = normalizeHistoryRecord(record);
   return buildDivinationData({
-    now: new Date(normalized.timestamp),
+    now: normalized._displayNow || parseHistoryDateValue(normalized.localTimestamp) || new Date(normalized.timestamp),
     userInput: normalized.input || '',
     lines: normalized.lines || reconstructLinesFromCodes(normalized.divCode, normalized.chgCode),
     source: normalized.source,
@@ -3099,7 +3534,7 @@ function renderHistory() {
   let html = '';
   for (let i = 0; i < history.length; i++) {
     const r = normalizeHistoryRecord(history[i]);
-    const d = new Date(r.timestamp);
+    const d = r._displayNow || parseHistoryDateValue(r.localTimestamp) || new Date(r.timestamp);
     const timeStr = d.getHours().toString().padStart(2,'0') + ':' +
                     d.getMinutes().toString().padStart(2,'0');
     const inputDisplay = r.input ? `「${escapeHtml(r.input.length > 20 ? r.input.slice(0,20)+'...' : r.input)}」` : '（空）';
@@ -3356,7 +3791,7 @@ function openHistoryDetail(index) {
 
   // --- Hexagram diagram ---
   html += `<div class="modal-block"><div class="modal-label">卦象图示</div>`;
-  html += renderLineComparisonBoard(data, najia, 'modal-compare');
+  html += renderMobileComparisonBoard(data, najia, 'modal-compare');
   html += `</div>`;
 
   // --- 月日关系 detail (only if any) ---
@@ -3505,7 +3940,7 @@ function loadHistoryIntoReplay(index) {
   if (!rawRecord) return;
   const record = normalizeHistoryRecord(rawRecord);
   if (!record || !record.lines) return;
-  document.getElementById('reviewTime').value = toDateTimeLocalValue(new Date(record.timestamp));
+  document.getElementById('reviewTime').value = toDateTimeLocalValue(record._displayNow || parseHistoryDateValue(record.localTimestamp) || new Date(record.timestamp));
   document.getElementById('reviewInput').value = record.input || '';
   applyReplayLines(record.lines);
   closeHistoryModal();
@@ -3571,9 +4006,9 @@ async function deleteHistoryRecord(index) {
   const record = visibleHistoryCache[index];
   const allHistory = getHistory();
   const ts = record.timestamp;
-  const input = record.input || '';
+  const recordKey = getHistoryRecordKey(record);
   if (!confirm(`确定删除这条记录？\n\n${record.dateStr} ${record.benName}卦 → ${record.chgName}卦`)) return;
-  const filtered = allHistory.filter(r => !(r.timestamp === ts && (r.input || '') === input));
+  const filtered = allHistory.filter(r => getHistoryRecordKey(r) !== recordKey);
   persistHistory(filtered);
   renderHistory();
 }
@@ -3746,10 +4181,10 @@ async function importSyncCode() {
     const records = await decodeSync(code);
     if (!Array.isArray(records) || records.length === 0) { alert('同步码中没有记录'); return; }
     const existing = getHistory();
-    const existingIds = new Set(existing.map(r => r.timestamp + '|' + (r.input || '')));
+    const existingIds = new Set(existing.map(r => getHistoryRecordKey(r)));
     let added = 0;
     for (const rec of records) {
-      const id = rec.timestamp + '|' + (rec.input || '');
+      const id = getHistoryRecordKey(rec);
       if (!existingIds.has(id)) {
         existing.unshift(rec);
         existingIds.add(id);
@@ -4321,7 +4756,7 @@ function renderNajiaPanel(data) {
   html += `纳甲详解 <span class="arrow">▶</span></button>`;
   html += `<div class="najia-content${isExpanded ? ' show' : ''}" id="najiaContent">`;
 
-  html += renderNajiaVisualRows();
+  html += renderMobileComparisonBoard(data, najia, 'najia-overview');
   html += `<div class="najia-summary-strip">`;
   html += `<div class="najia-summary-item"><span class="label">时日</span><span class="value">${najia.dayGZ.ganName}${najia.dayGZ.zhiName}日 · ${najia.monthZhiName}月 · ${najia.xunKong.join('')}空</span></div>`;
   html += `<div class="najia-summary-item"><span class="label">卦位</span><span class="value">${najia.palace.palace}宫（${najia.palaceWx}）· ${najia.palace.position}</span></div>`;

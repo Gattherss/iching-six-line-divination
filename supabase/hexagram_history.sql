@@ -4,6 +4,8 @@ create table if not exists public.hexagram_history (
   id uuid primary key default uuid_generate_v4(),
   user_id uuid not null references auth.users(id) on delete cascade,
   timestamp timestamptz not null,
+  local_timestamp text not null default '',
+  record_id text not null default '',
   shichen text not null,
   date_str text not null,
   input text not null default '',
@@ -20,8 +22,24 @@ create table if not exists public.hexagram_history (
   created_at timestamptz not null default now()
 );
 
+alter table public.hexagram_history
+  add column if not exists local_timestamp text not null default '';
+
+alter table public.hexagram_history
+  add column if not exists record_id text not null default '';
+
+update public.hexagram_history
+set local_timestamp = coalesce(nullif(local_timestamp, ''), to_char(timestamp at time zone 'UTC', 'YYYY-MM-DD"T"HH24:MI'))
+where coalesce(local_timestamp, '') = '';
+
+update public.hexagram_history
+set record_id = concat_ws('|', timestamp::text, coalesce(local_timestamp, ''), input, div_code, chg_code, source)
+where coalesce(record_id, '') = '';
+
+drop index if exists idx_hexagram_unique;
+
 create unique index if not exists idx_hexagram_unique
-  on public.hexagram_history(user_id, timestamp);
+  on public.hexagram_history(user_id, record_id);
 
 create index if not exists idx_hexagram_user_ts
   on public.hexagram_history(user_id, timestamp desc);
