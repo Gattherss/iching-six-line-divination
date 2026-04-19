@@ -1698,19 +1698,23 @@ body.modal-open {
     letter-spacing: 0.22em;
   }
   .app-build-badge {
-    top: max(0.6rem, env(safe-area-inset-top));
-    right: max(0.6rem, env(safe-area-inset-right));
-    min-width: 10.5rem;
-    max-width: min(72vw, 16rem);
-    padding: 0.62rem 0.68rem;
-    border-radius: 14px;
+    top: max(0.4rem, env(safe-area-inset-top));
+    right: max(0.4rem, env(safe-area-inset-right));
+    min-width: auto;
+    max-width: min(56vw, 10rem);
+    padding: 0.44rem 0.5rem;
+    border-radius: 12px;
+    gap: 0.08rem;
+  }
+  .app-build-label {
+    font-size: 0.46rem;
   }
   .app-build-name {
-    font-size: 0.84rem;
+    font-size: 0.66rem;
   }
   .app-build-version,
   .app-build-source {
-    font-size: 0.62rem;
+    font-size: 0.52rem;
   }
   .result-gua-strip {
     grid-template-columns: 1fr;
@@ -1851,21 +1855,24 @@ body.modal-open {
     line-height: 1.6;
   }
   .app-build-badge {
-    top: max(0.48rem, env(safe-area-inset-top));
-    right: max(0.48rem, env(safe-area-inset-right));
-    min-width: 9.2rem;
-    max-width: min(76vw, 13rem);
-    padding: 0.56rem 0.6rem;
+    top: 0.32rem;
+    right: 0.32rem;
+    min-width: auto;
+    max-width: min(44vw, 7.5rem);
+    padding: 0.36rem 0.42rem;
+    border-radius: 10px;
+    gap: 0;
   }
   .app-build-label {
-    font-size: 0.52rem;
+    display: none;
   }
   .app-build-name {
-    font-size: 0.76rem;
+    font-size: 0.52rem;
+    line-height: 1.2;
   }
   .app-build-version,
   .app-build-source {
-    font-size: 0.58rem;
+    display: none;
   }
   .history-modal-card {
     width: 100vw;
