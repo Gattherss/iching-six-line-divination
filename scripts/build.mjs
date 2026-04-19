@@ -10,26 +10,27 @@ const outDir = join(root, 'dist');
 const outHtml = join(outDir, 'wenshi-liuyao.html');
 
 // Resolve version: prefer git tag, fall back to package.json + date + short hash
+function safeExec(cmd) {
+  try {
+    return execSync(cmd, { cwd: root, encoding: 'utf8', stdio: ['pipe', 'pipe', 'pipe'] }).trim();
+  } catch {
+    return null;
+  }
+}
+
 function getVersion() {
   // 1. Try latest git tag
-  try {
-    const tag = execSync('git describe --tags --exact-match', {
-      cwd: root,
-      encoding: 'utf8',
-      stdio: ['pipe', 'pipe', 'pipe']
-    }).trim();
-    if (tag.startsWith('v')) return tag;
-    return 'v' + tag;
-  } catch {}
+  const tag = safeExec('git describe --tags --exact-match');
+  if (tag) return tag.startsWith('v') ? tag : 'v' + tag;
 
-  // 2. Fallback: package.json version + date + short hash
+  // 2. Fallback: package.json version + optional date/hash
   const pkg = JSON.parse(readFileSync(join(root, 'package.json'), 'utf8'));
-  const shortHash = execSync('git rev-parse --short HEAD', {
-    cwd: root,
-    encoding: 'utf8'
-  }).trim();
+  const shortHash = safeExec('git rev-parse --short HEAD');
   const date = new Date().toISOString().slice(0, 10);
-  return `v${pkg.version} (${date} · ${shortHash})`;
+  const parts = [`v${pkg.version}`];
+  if (date) parts.push(date);
+  if (shortHash) parts.push(shortHash);
+  return parts.join(' · ');
 }
 
 mkdirSync(outDir, { recursive: true });

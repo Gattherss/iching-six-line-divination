@@ -1,0 +1,29 @@
+# Large binaries
+supabase.exe
+*.mp4
+*.png
+*.jpg
+*.jpeg
+*.zip
+*.docx
+*.pptx
+*.pdf
+
+# Tools & IDE
+tools/
+.vscode/
+.idea/
+
+# Node
+node_modules/
+
+# Tauri (not used for web)
+wenshi-liuyao-tauri/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Temp
+.tmp_*/
+*.tmp
