@@ -3,6 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
 <title>问时六爻 — 纳甲六爻排盘</title>
 <style>
 :root {
@@ -97,6 +100,57 @@ body.modal-open {
   font-size: 0.92rem;
   margin-top: 0.7rem;
   letter-spacing: 0.08em;
+}
+.app-build-badge {
+  position: fixed;
+  top: max(0.8rem, env(safe-area-inset-top));
+  right: max(0.8rem, env(safe-area-inset-right));
+  z-index: 12;
+  display: flex;
+  flex-direction: column;
+  gap: 0.16rem;
+  align-items: flex-start;
+  min-width: min(52vw, 14.5rem);
+  max-width: min(68vw, 19rem);
+  padding: 0.72rem 0.82rem 0.68rem;
+  border-radius: 16px;
+  border: 1px solid rgba(216, 186, 100, 0.28);
+  background: linear-gradient(180deg, rgba(9, 18, 34, 0.92), rgba(16, 28, 49, 0.9));
+  box-shadow: 0 16px 36px rgba(2, 9, 22, 0.32);
+  backdrop-filter: blur(16px);
+  color: var(--text);
+  text-align: left;
+  cursor: pointer;
+}
+.app-build-badge:hover {
+  border-color: rgba(216, 186, 100, 0.42);
+  transform: translateY(-1px);
+}
+.app-build-label {
+  font-size: 0.58rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(216, 186, 100, 0.78);
+}
+.app-build-name {
+  font-size: 0.92rem;
+  line-height: 1.15;
+  color: var(--gold);
+  font-weight: 600;
+}
+.app-build-version,
+.app-build-source {
+  font-size: 0.68rem;
+  line-height: 1.35;
+  color: var(--text-dim);
+  word-break: break-all;
+}
+.app-build-version {
+  font-family: "Consolas", "SFMono-Regular", monospace;
+  color: #c8d7eb;
+}
+.app-build-badge.copied .app-build-version {
+  color: #9fe5ad;
 }
 .shichen-bar {
   width: min(92vw, 760px);
@@ -1643,6 +1697,21 @@ body.modal-open {
   .header h1 {
     letter-spacing: 0.22em;
   }
+  .app-build-badge {
+    top: max(0.6rem, env(safe-area-inset-top));
+    right: max(0.6rem, env(safe-area-inset-right));
+    min-width: 10.5rem;
+    max-width: min(72vw, 16rem);
+    padding: 0.62rem 0.68rem;
+    border-radius: 14px;
+  }
+  .app-build-name {
+    font-size: 0.84rem;
+  }
+  .app-build-version,
+  .app-build-source {
+    font-size: 0.62rem;
+  }
   .result-gua-strip {
     grid-template-columns: 1fr;
     gap: 0.7rem;
@@ -1781,6 +1850,23 @@ body.modal-open {
     font-size: 0.82rem;
     line-height: 1.6;
   }
+  .app-build-badge {
+    top: max(0.48rem, env(safe-area-inset-top));
+    right: max(0.48rem, env(safe-area-inset-right));
+    min-width: 9.2rem;
+    max-width: min(76vw, 13rem);
+    padding: 0.56rem 0.6rem;
+  }
+  .app-build-label {
+    font-size: 0.52rem;
+  }
+  .app-build-name {
+    font-size: 0.76rem;
+  }
+  .app-build-version,
+  .app-build-source {
+    font-size: 0.58rem;
+  }
   .history-modal-card {
     width: 100vw;
     min-height: 100dvh;
@@ -1858,6 +1944,13 @@ body.modal-open {
 </style>
 </head>
 <body>
+
+<button class="app-build-badge" id="appBuildBadge" type="button" onclick="copyBuildMarker()" aria-label="复制当前页面版本信息">
+  <span class="app-build-label">Build</span>
+  <span class="app-build-name" id="appBuildName">wenshi-liuyao</span>
+  <span class="app-build-version" id="appBuildVersion">loading...</span>
+  <span class="app-build-source" id="appBuildSource">loading...</span>
+</button>
 
 <div class="header">
   <h1>问 时 六 爻</h1>
@@ -3708,6 +3801,74 @@ async function copyTextWithFallback(text, textareaId) {
   }
 }
 
+const APP_BUILD_INFO = {
+  project: 'wenshi-liuyao',
+  version: '2026-04-19 · 9f76e0f',
+  commit: '9f76e0f'
+};
+
+function getBuildSourceLabel() {
+  var href = '';
+  try {
+    href = String(window.location && window.location.href || '');
+  } catch (e) {}
+  if (!href) return 'source unavailable';
+  if (href.startsWith('content://')) {
+    return href.length > 34 ? href.slice(0, 34) + '…' : href;
+  }
+  if (href.startsWith('file://')) {
+    return href.length > 38 ? href.slice(0, 38) + '…' : href;
+  }
+  try {
+    if (window.location && window.location.origin && window.location.origin !== 'null') {
+      return window.location.origin;
+    }
+  } catch (e) {}
+  return href.length > 42 ? href.slice(0, 42) + '…' : href;
+}
+
+function getBuildMarkerText() {
+  return [
+    APP_BUILD_INFO.project,
+    APP_BUILD_INFO.version,
+    getBuildSourceLabel()
+  ].join('\n');
+}
+
+function renderBuildMarker() {
+  var nameEl = document.getElementById('appBuildName');
+  var versionEl = document.getElementById('appBuildVersion');
+  var sourceEl = document.getElementById('appBuildSource');
+  if (nameEl) nameEl.textContent = APP_BUILD_INFO.project;
+  if (versionEl) versionEl.textContent = APP_BUILD_INFO.version;
+  if (sourceEl) sourceEl.textContent = getBuildSourceLabel();
+}
+
+async function copyBuildMarker() {
+  var badge = document.getElementById('appBuildBadge');
+  var text = getBuildMarkerText();
+  try {
+    await navigator.clipboard.writeText(text);
+  } catch (e) {
+    var temp = document.createElement('textarea');
+    temp.value = text;
+    temp.setAttribute('readonly', '');
+    temp.style.position = 'fixed';
+    temp.style.opacity = '0';
+    document.body.appendChild(temp);
+    temp.focus();
+    temp.select();
+    document.execCommand('copy');
+    document.body.removeChild(temp);
+  }
+  if (!badge) return;
+  badge.classList.add('copied');
+  clearTimeout(copyBuildMarker._timer);
+  copyBuildMarker._timer = setTimeout(function() {
+    badge.classList.remove('copied');
+  }, 1200);
+}
+
 async function copyCurrentText() {
   const text = getCurrentPanelText();
   if (!text) return;
@@ -4833,6 +4994,7 @@ document.getElementById('userInput').addEventListener('keydown', function(e) {
 
 updateShichenBar();
 setInterval(updateShichenBar, 60000);
+renderBuildMarker();
 migrateLegacyHistory();
 if (window.WenShiAuth) {
   window.WenShiAuth.init();
@@ -4956,6 +5118,7 @@ Object.assign(window, {
   closeAuthModal,
   handleMagicLinkSend,
   handleSignOut,
+  copyBuildMarker,
   updateAuthUI,
   resetReplayForm,
   runReplay,
